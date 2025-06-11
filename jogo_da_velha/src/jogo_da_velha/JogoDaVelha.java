@@ -14,6 +14,7 @@ public class JogoDaVelha {
 	private LinkedHashMap <Integer, String> historico;
 	private int qtdJogadas;
 	private int nivelIa;
+	private String linhaVencedora;
 	
 	// Constructors
 	public JogoDaVelha(String simbolo1, String simbolo2){
@@ -76,14 +77,33 @@ public class JogoDaVelha {
 	
 	// Gets
 	public String getSimbolo(int numeroJogador){
+		if (numeroJogador <= 0 || numeroJogador > 2) {return  "Inválido";}
 		return simbolos[numeroJogador - 1];
+	}
+	public String getFoto() {
+	    String foto = "";
+
+	    for (int i = 0; i < celulas.length; i++) {
+	        if (celulas[i] == null) {
+	            foto += i;
+	        } else {
+	            foto += celulas[i];
+	        }
+	        if ((i + 1) % 3 != 0) {
+	            foto += " | ";
+	        }
+	        if ((i + 1) % 3 == 0 && i < 8) {
+	            foto += "\n";
+	            foto += "-------\n";
+	        }
+	    }
+	    return foto;
 	}
 	
 	public int getResultado() {
 		if (qtdJogadas < 3) {
 			return -1;
-		}
-		
+		}	
 		for (String resultado : ResultadoVencedor) {
 			int indice1 = Character.getNumericValue(resultado.charAt(0));
 			int indice2 = Character.getNumericValue(resultado.charAt(1));
@@ -95,6 +115,7 @@ public class JogoDaVelha {
 			String check3 = celulas[indice3];
 			
 			if ((check1.equals(check2)) && (check2.equals(check3))) {
+				 linhaVencedora = resultado;
 				if (check1.equals(getSimbolo(1))) {
 					return 1;
 				} else { return 2;}
@@ -105,6 +126,9 @@ public class JogoDaVelha {
 		}
 		
 		return -1;
+	}
+	public String getLinhaVencedora() {
+	    return this.linhaVencedora;
 	}
 	
 	public ArrayList<Integer> getPosicoesDisponiveis(){
@@ -128,6 +152,10 @@ public class JogoDaVelha {
 		return vez;
 	}
 	
+	public String[] getCelulas() {
+	    return celulas;
+	}
+	
 	private int getJogadaVencedora(int numeroJogador) {
 		for (String resultado : ResultadoVencedor) {
 			String SimboloJogador = getSimbolo(numeroJogador);
@@ -144,6 +172,10 @@ public class JogoDaVelha {
             if (SimboloJogador.equals(check2) && SimboloJogador.equals(check3) && check1 == null) return indice1;
 		}
 		return -1;
+	}
+	
+	public int getNivelIa() {
+	    return nivelIa;
 	}
 	
 	// Checks
