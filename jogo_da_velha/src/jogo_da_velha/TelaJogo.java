@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 import javax.swing.JButton;
@@ -26,7 +27,10 @@ public class TelaJogo {
 	private JLabel[][] grid;
 	private JogoDaVelha jogo;
 	private LinkedHashMap <Integer, String> historico;
-	private String[] celulasDoJogo;
+	
+	private int nivelIa = 0;
+	private final String[] ResultadoVencedor = {"012", "345", "678", "036", "147", "258", "048", "246"};
+	private String[] niveis;
 	
 	// botoes menu
 	private JButton btnDoisJogadores;
@@ -34,7 +38,7 @@ public class TelaJogo {
 	private JButton btnNovaPartida;
 	private JButton btnHistorico;
 	private JButton btnStart;
-	private JButton btnVoltar;
+	
 	// inputs menu
 	private JTextField inputSimboloP1;
 	private JTextField inputSimboloP2;
@@ -59,7 +63,7 @@ public class TelaJogo {
 	}
 
 	private void initialize() {
-		
+
 		frame = new JFrame();
 		frame.setTitle("Jogo da velha");
 		frame.setBounds(0, 0, 600, 700);
@@ -95,56 +99,10 @@ public class TelaJogo {
 
 	}
 	
-	private void loadGrid() {
-		int n = 3; 
-		grid = new JLabel[n][n];
-		int contador = 0;
-		int d1 = 105; 
-		int d2 = 210; 
-		for (int y = 0; y < n; y++) { 
-			for (int x = 0; x < n; x++) {
-				grid[x][y] = new JLabel(contador + ""); 
-				contador++;
-				final int posicao = contador - 1;
-				frame.getContentPane().add(grid[x][y]);
-				grid[x][y].setBounds(d1+x*130, d2+y*130, 130, 130); 
-				grid[x][y].setBackground(Color.white);
-				grid[x][y].setHorizontalAlignment(SwingConstants.CENTER);
-				grid[x][y].setBorder(new LineBorder(Color.BLACK, 1, true)); 
-				grid[x][y].setOpaque(true);
-				grid[x][y].addMouseListener(new MouseAdapter() {
-					public void mouseClicked(MouseEvent e) {
-						if (jogo.terminou()) {
-							return;
-						}
-						JLabel labelClicada = (JLabel) e.getSource();
-						int vez = jogo.getVez();
-						
-						
-						try {
-							jogo.jogaJogador(vez, posicao);
-							atualizarGrid();						
-							fimDeJogo();
-							
-							if (jogo.getNivelIa() > 0 && !jogo.terminou()) {
-				                jogo.jogaMaquina();
-				                atualizarGrid();
-				                fimDeJogo();
-				            }
-
-						} catch (Exception ex) {
-							JOptionPane.showMessageDialog(frame, ex.getMessage());
-						}
-
-					}
-				});
-			}
-		}
-		
-	}
 	
 	private void load2Players() {
-		frame.getContentPane().removeAll();
+		frame.getContentPane().remove(btnContraMaquina);
+		frame.getContentPane().remove(btnDoisJogadores);
 	    
 	    btnNovaPartida = new JButton("Nova Partida");
 	    btnNovaPartida.setBounds(110, 20, 180, 50);
@@ -227,6 +185,7 @@ public class TelaJogo {
 	    	}
 	    	
 	    });
+	    
 	   
 	}
 	
@@ -266,9 +225,9 @@ public class TelaJogo {
 	    inputSimboloP1.setVisible(false);
 	    frame.getContentPane().add(inputSimboloP1);
 	    
-	    String[] niveis = {"Nível 1", "Nível 2"};
+	    niveis = new String[]{"Nível 1", "Nível 2"};
 	    inputIaNivel = new JComboBox<>(niveis);
-	    inputIaNivel.setBounds(320, 90, 80, 40);
+	    inputIaNivel.setBounds(320, 90, 100, 40);
 	    inputIaNivel.setFont(new Font("Arial", Font.PLAIN, 14));
 	    inputIaNivel.setEnabled(false);
 	    inputIaNivel.setVisible(false);
@@ -291,7 +250,8 @@ public class TelaJogo {
 	    btnStart.addActionListener(new ActionListener() {
 	    	public void actionPerformed (ActionEvent e) {
 	    		limparGrid();
-	    		jogo = new JogoDaVelha(inputSimboloP1.getText(), inputIaNivel.getSelectedIndex() + 1);
+	    		nivelIa = inputIaNivel.getSelectedIndex() + 1;
+	    		jogo = new JogoDaVelha(inputSimboloP1.getText(), nivelIa);
 	    		
 	    		btnHistorico.setEnabled(true);
 	    	    btnHistorico.setVisible(true);
@@ -313,6 +273,67 @@ public class TelaJogo {
 	    	}
 	    	
 	    });
+	    
+	}
+	
+	// grid
+	private void loadGrid() {
+		int n = 3; 
+		grid = new JLabel[n][n];
+		int contador = 0;
+		int d1 = 105; 
+		int d2 = 210; 
+		for (int y = 0; y < n; y++) { 
+			for (int x = 0; x < n; x++) {
+				grid[x][y] = new JLabel(contador + ""); 
+				contador++;
+				final int posicao = contador - 1;
+				frame.getContentPane().add(grid[x][y]);
+				grid[x][y].setBounds(d1+x*130, d2+y*130, 130, 130); 
+				grid[x][y].setBackground(Color.white);
+				grid[x][y].setHorizontalAlignment(SwingConstants.CENTER);
+				grid[x][y].setBorder(new LineBorder(Color.BLACK, 1, true)); 
+				grid[x][y].setOpaque(true);
+				grid[x][y].addMouseListener(new MouseAdapter() {
+					public void mouseClicked(MouseEvent e) {
+						JLabel label = (JLabel) e.getSource();
+						if (jogo.terminou()) {
+							return;
+						}
+						int vez = (jogo.getHistorico().size() % 2) + 1;
+						
+						try {
+							jogo.jogaJogador(vez, posicao);
+							label.setText(jogo.getSimbolo(vez));
+							label.setFont(new Font("Arial", Font.BOLD, 80));						
+							if (jogo.terminou()) {
+								fimDeJogo();
+							}
+							
+							if (nivelIa > 0 && !jogo.terminou()) {
+				                jogo.jogaMaquina();
+				                ArrayList<Integer> posicoesJogadas = new ArrayList<>(jogo.getHistorico().keySet());
+				                int ultimaPosicao = posicoesJogadas.get(posicoesJogadas.size() - 1);
+				                int maquinaY = ultimaPosicao / 3; 
+				                int maquinaX = ultimaPosicao % 3; 
+				                
+				                grid[maquinaX][maquinaY].setText(jogo.getSimbolo(2));
+				                grid[maquinaX][maquinaY].setFont(new Font("Arial", Font.BOLD, 80));
+								if (jogo.terminou()) {
+									fimDeJogo();
+								}
+				             
+				            }
+
+						} catch (Exception ex) {
+							JOptionPane.showMessageDialog(frame, ex.getMessage());
+						}
+
+					}
+				});
+			}
+		}
+		
 	}
 	
 	private void limparGrid() {
@@ -330,21 +351,6 @@ public class TelaJogo {
 	    }
 	}
 	
-	private void atualizarGrid() {
-	    celulasDoJogo = jogo.getCelulas();
-	    for (int i = 0; i < 9; i++) {
-	        int x = i % 3;
-	        int y = i / 3;
-	        if (celulasDoJogo[i] != null) {
-	            grid[x][y].setText(celulasDoJogo[i]);
-	            grid[x][y].setFont(new Font("Arial", Font.BOLD, 80));
-	        } else {
-	            grid[x][y].setText(i + "");
-	        }
-	    }
-	    frame.revalidate();
-	    frame.repaint();
-	}
 	
 	private void fimDeJogo() {
 		if (jogo.terminou()) {
@@ -354,12 +360,34 @@ public class TelaJogo {
 				mensagemFinal = "O jogo terminou em empate!";
 				JOptionPane.showMessageDialog(frame, mensagemFinal);
 			} else {
-				String linhaVencedora = jogo.getLinhaVencedora();
-	            for (char c : linhaVencedora.toCharArray()) {
-	                int pos = Character.getNumericValue(c);
-	                int x = pos % 3;
-	                int y = pos / 3;
-	                grid[x][y].setBackground(Color.YELLOW);
+				String simboloVencedor = jogo.getSimbolo(resultado);
+				String[] celulas = new String[9];
+				
+			    for (java.util.Map.Entry<Integer, String> entry : jogo.getHistorico().entrySet()) {
+			        celulas[entry.getKey()] = entry.getValue();
+			    }
+			    
+				for (String checkResultado : ResultadoVencedor) {
+					
+					int indice1 = Character.getNumericValue(checkResultado.charAt(0));
+					int indice2 = Character.getNumericValue(checkResultado.charAt(1));
+					int indice3 = Character.getNumericValue(checkResultado.charAt(2));
+					
+					if (simboloVencedor.equals(celulas[indice1]) &&
+				        simboloVencedor.equals(celulas[indice2]) &&
+				        simboloVencedor.equals(celulas[indice3])) {
+
+				            int[] colorir = {indice1, indice2, indice3};
+
+				            for (int pos : colorir) {
+				                int y = pos / 3;
+				                int x = pos % 3;
+				                grid[x][y].setBackground(Color.YELLOW);
+				            }
+				            break;
+				        }
+	   
+	                
 	            }
 			}
 			

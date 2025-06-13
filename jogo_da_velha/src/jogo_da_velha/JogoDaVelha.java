@@ -14,7 +14,6 @@ public class JogoDaVelha {
 	private LinkedHashMap <Integer, String> historico;
 	private int qtdJogadas;
 	private int nivelIa;
-	private String linhaVencedora;
 	
 	// Constructors
 	public JogoDaVelha(String simbolo1, String simbolo2){
@@ -115,7 +114,7 @@ public class JogoDaVelha {
 			String check3 = celulas[indice3];
 			
 			if ((check1.equals(check2)) && (check2.equals(check3))) {
-				 linhaVencedora = resultado;
+				 
 				if (check1.equals(getSimbolo(1))) {
 					return 1;
 				} else { return 2;}
@@ -126,9 +125,6 @@ public class JogoDaVelha {
 		}
 		
 		return -1;
-	}
-	public String getLinhaVencedora() {
-	    return this.linhaVencedora;
 	}
 	
 	public ArrayList<Integer> getPosicoesDisponiveis(){
@@ -145,16 +141,8 @@ public class JogoDaVelha {
 		return historico;
 	}
 	
-	public Integer getVez() {
-		int vez;
-		if (qtdJogadas == 0) { vez = 1;}
-		else {vez = (qtdJogadas % 2) + 1;}
-		return vez;
-	}
 	
-	public String[] getCelulas() {
-	    return celulas;
-	}
+	
 	
 	private int getJogadaVencedora(int numeroJogador) {
 		for (String resultado : ResultadoVencedor) {
@@ -174,9 +162,6 @@ public class JogoDaVelha {
 		return -1;
 	}
 	
-	public int getNivelIa() {
-	    return nivelIa;
-	}
 	
 	// Checks
 	public boolean terminou() {
